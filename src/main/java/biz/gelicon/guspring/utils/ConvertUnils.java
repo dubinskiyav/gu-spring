@@ -26,27 +26,6 @@ public class ConvertUnils {
             "dd.MM.yyyy HH:mm:ss");
 
     /**
-     * Возвращает значение фильтра или ""
-     *
-     * @param gelRequestParam
-     * @param key
-     * @return
-     */
-    public static String getFilterValue(
-            GelRequestParam gelRequestParam,
-            String key
-    ) {
-        if (gelRequestParam != null && gelRequestParam.getFilters() != null) {
-            return gelRequestParam.getFilters().stream()
-                    .filter(f -> f.getKey().equals(key))
-                    .map(GelRequestParam.Filter::getValue)
-                    .findFirst()
-                    .orElse("");
-        }
-        return "";
-    }
-
-    /**
      * Возвращает true для пустой или пробельной строки и null
      *
      * @param s строка

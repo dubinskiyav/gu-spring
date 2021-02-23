@@ -20,7 +20,7 @@ public class GelRequestParam {
     private List<Sorter> sort;
 
     @Schema(description = "Фильтры на выборку")
-    private List<Filter> filters;
+    private Map<String,String> filters;
 
     /**
      * Вспомогательный класс для сортировки Имя поля - как в базе
@@ -65,55 +65,11 @@ public class GelRequestParam {
 
     }
 
-    /**
-     * Вспомогательный класс для фильтра
-     */
-    @Schema(description = "Фильтр для выборки")
-    public static class Filter {
-
-        @Schema(description = "Имя фильтра", example = "onlyBlock")
-        private String key;
-        @Schema(description = "Значение фильра", example = "true")
-        private String value;
-
-        public Filter(String key, String value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public Filter() {
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setKey(String key) {
-            this.key = key;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return "Filter{" +
-                    "key='" + key + '\'' +
-                    ", value='" + value + '\'' +
-                    '}';
-        }
-    }
-
     public GelRequestParam(
             Integer pageNumber,
             Integer pageSize,
             List<Sorter> sort,
-            List<Filter> filters
+            Map<String,String> filters
     ) {
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
@@ -124,11 +80,11 @@ public class GelRequestParam {
     public GelRequestParam() {
     }
 
-    public List<Filter> getFilters() {
+    public Map<String,String> getFilters() {
         return filters;
     }
 
-    public void setFilters(List<Filter> filters) {
+    public void setFilters(Map<String,String> filters) {
         this.filters = filters;
     }
 
@@ -155,8 +111,6 @@ public class GelRequestParam {
     public void setSort(List<Sorter> sort) {
         this.sort = sort;
     }
-
-
 
     @Override
     public String toString() {

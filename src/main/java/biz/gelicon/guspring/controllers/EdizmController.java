@@ -9,11 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +52,8 @@ public class EdizmController {
                 + "       edizm_code \n"
                 + "FROM   edizm\n"
                 + "WHERE  1=1\n"
-                + "/*F01*/ -- Фильтр по заблокированным";
+                + "/*F01*/ -- Фильтр по заблокированным\n"
+                + "/*F02*/ -- Фильтр по флагу блокировки";
         // Сформируем секцию пагинации
         // Соответствия полей в базе с полями в клиентах
         // todo надо вытащить из аннотаций
@@ -64,31 +68,42 @@ public class EdizmController {
         // Фильтры
         if (gelRequestParam.getFilters() != null) {
             // Только заблокированные
-            if (gelRequestParam.getFilters().stream()
-                    .filter(f -> f.getKey().equals("onlyBlock"))
-                    .anyMatch(f -> f.getValue().equals("true"))) {
+            boolean onlyBlock = Boolean.valueOf(gelRequestParam.getFilters().get("onlyBlock"));
+            if (onlyBlock) {
                 // Заменим фрагмент на условие
                 sqlText = sqlText.replace("/*F01*/", "  AND  edizm_blockflag = 1");
             }
-            // Только НЕ заблокированные
-            if (gelRequestParam.getFilters().stream()
-                    .filter(f -> f.getKey().equals("onlyBlock"))
-                    .anyMatch(f -> f.getValue().equals("false"))) {
-                // Заменим фрагмент на условие
-                sqlText = sqlText.replace("/*F01*/", "  AND  edizm_blockflag = 0");
+            // По значению поля флаг блокировки
+            int blockFlag = Integer.parseInt(gelRequestParam.getFilters().get("blockFlag"));
+            switch (blockFlag) {
+                case (2): // Заблокированные
+                    sqlText = sqlText.replace("/*F02*/", "  AND  edizm_blockflag = 1");
+                    break;
+                case (3): // Не запблкированные
+                    sqlText = sqlText.replace("/*F02*/", "  AND  edizm_blockflag = 0");
+                    break;
+                default:
+                    break;
             }
         }
         logger.info(sqlText);
-        return jdbcTemplate.query(sqlText,
-                (rs, rowNum) ->
-                        new EdizmEntity(
-                                rs.getInt("edizm_id"),
-                                rs.getString("edizm_name"),
-                                rs.getString("edizm_notation"),
-                                rs.getInt("edizm_blockflag"),
-                                rs.getString("edizm_code")
-                        )
-        );
+        try {
+            return jdbcTemplate.query(sqlText,
+                    (rs, rowNum) ->
+                            new EdizmEntity(
+                                    rs.getInt("edizm_id"),
+                                    rs.getString("edizm_name"),
+                                    rs.getString("edizm_notation"),
+                                    rs.getInt("edizm_blockflag"),
+                                    rs.getString("edizm_code")
+                            )
+            );
+        } catch (Exception e) {
+            EdizmEntity error = new EdizmEntity();
+            error.notation = "errorCode=38";
+            error.name = e.getMessage();
+            return Collections.singletonList(error);
+        }
     }
 
 
