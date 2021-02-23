@@ -26,6 +26,27 @@ public class ConvertUnils {
             "dd.MM.yyyy HH:mm:ss");
 
     /**
+     * Возвращает значение фильтра или ""
+     *
+     * @param gelRequestParam
+     * @param key
+     * @return
+     */
+    public static String getFilterValue(
+            GelRequestParam gelRequestParam,
+            String key
+    ) {
+        if (gelRequestParam != null && gelRequestParam.getFilters() != null) {
+            return gelRequestParam.getFilters().stream()
+                    .filter(f -> f.getKey().equals(key))
+                    .map(GelRequestParam.Filter::getValue)
+                    .findFirst()
+                    .orElse("");
+        }
+        return "";
+    }
+
+    /**
      * Возвращает true для пустой или пробельной строки и null
      *
      * @param s строка
@@ -129,7 +150,9 @@ public class ConvertUnils {
                                 (fieldMap != null && fieldMap.containsKey(s.getField())) ?
                                         fieldMap.get(s.getField()) : s.getField();
                         // Заменим направление сортировки
-                        String order = (s.getOrder() != null && s.getOrder().equals("descend")) ? "DESC" : "";
+                        String order =
+                                (s.getOrder() != null && s.getOrder().equals("descend")) ? "DESC"
+                                        : "";
                         return fieldName + " " + order;
                     })
                     .collect(Collectors.joining(",\n         ", "\nORDER BY ", ""));

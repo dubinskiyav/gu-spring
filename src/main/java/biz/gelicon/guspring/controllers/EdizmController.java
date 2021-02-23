@@ -70,21 +70,15 @@ public class EdizmController {
                 // Заменим фрагмент на условие
                 sqlText = sqlText.replace("/*F01*/", "  AND  edizm_blockflag = 1");
             }
-
-            if (false) {
-                String onlyBlock = gelRequestParam.getFilters().stream()
-                        .filter(f -> f.getKey().equals("onlyBlock"))
-                        .filter(f -> f.getValue().equals("true"))
-                        .findAny()
-                        .map(f -> "  AND  edizm_blockflag = 1")
-                        .orElse(null);
-                if (onlyBlock != null) {
-                    // Заменим фрагмент на условие
-                    sqlText = sqlText.replace("/*F01*/", onlyBlock);
-                }
+            // Только НЕ заблокированные
+            if (gelRequestParam.getFilters().stream()
+                    .filter(f -> f.getKey().equals("onlyBlock"))
+                    .anyMatch(f -> f.getValue().equals("false"))) {
+                // Заменим фрагмент на условие
+                sqlText = sqlText.replace("/*F01*/", "  AND  edizm_blockflag = 0");
             }
         }
-        //logger.info(sqlText);
+        logger.info(sqlText);
         return jdbcTemplate.query(sqlText,
                 (rs, rowNum) ->
                         new EdizmEntity(
