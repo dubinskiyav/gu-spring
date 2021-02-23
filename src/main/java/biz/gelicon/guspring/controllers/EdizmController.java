@@ -1,6 +1,7 @@
 package biz.gelicon.guspring.controllers;
 
 import biz.gelicon.guspring.entities.EdizmEntity;
+import biz.gelicon.guspring.utils.ConvertUnils;
 import biz.gelicon.guspring.utils.GelRequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Tag(name = "Единицы измерения", description = "Контроллер для справочника единиц измерения")
@@ -36,15 +39,52 @@ public class EdizmController {
     public List<EdizmEntity> read(
             @RequestBody GelRequestParam gelRequestParam
     ) {
-        logger.info("Edizm - read: gelRequestParam = " + "gelRequestParam");
+        logger.info("Edizm - read: gelRequestParam = {}", gelRequestParam);
         // Выборка
-        String sqlText = "\n"
+        String sqlText = ""
                 + "SELECT edizm_id,\n"
                 + "       edizm_name,\n"
                 + "       edizm_notation,\n"
                 + "       edizm_blockflag,\n"
                 + "       edizm_code \n"
-                + "FROM   edizm ";
+                + "FROM   edizm\n"
+                + "WHERE  1=1\n"
+                + "/*F01*/ -- Фильтр по заблокированным";
+        // Сформируем секцию пагинации
+        // Соответствия полей в базе с полями в клиентах
+        // todo надо вытащить из аннотаций
+        // Соответствия полей в базе с полями в клиентах
+        Map<String, String> fieldMap = new HashMap<>();
+        fieldMap.put("id", "edizm_id");
+        fieldMap.put("name", "edizm_name");
+        fieldMap.put("notation", "edizm_notation");
+        fieldMap.put("blockflag", "edizm_blockflag");
+        fieldMap.put("code", "edizm_code");
+        sqlText = ConvertUnils.buildPaginationSection(sqlText, gelRequestParam, fieldMap);
+        // Фильтры
+        if (gelRequestParam.getFilters() != null) {
+            // Только заблокированные
+            if (gelRequestParam.getFilters().stream()
+                    .filter(f -> f.getKey().equals("onlyBlock"))
+                    .anyMatch(f -> f.getValue().equals("true"))) {
+                // Заменим фрагмент на условие
+                sqlText = sqlText.replace("/*F01*/", "  AND  edizm_blockflag = 1");
+            }
+
+            if (false) {
+                String onlyBlock = gelRequestParam.getFilters().stream()
+                        .filter(f -> f.getKey().equals("onlyBlock"))
+                        .filter(f -> f.getValue().equals("true"))
+                        .findAny()
+                        .map(f -> "  AND  edizm_blockflag = 1")
+                        .orElse(null);
+                if (onlyBlock != null) {
+                    // Заменим фрагмент на условие
+                    sqlText = sqlText.replace("/*F01*/", onlyBlock);
+                }
+            }
+        }
+        //logger.info(sqlText);
         return jdbcTemplate.query(sqlText,
                 (rs, rowNum) ->
                         new EdizmEntity(
