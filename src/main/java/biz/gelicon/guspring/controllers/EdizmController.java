@@ -3,8 +3,14 @@ package biz.gelicon.guspring.controllers;
 import biz.gelicon.guspring.entities.EdizmEntity;
 import biz.gelicon.guspring.exceptions.FetchQueryException;
 import biz.gelicon.guspring.utils.ConvertUnils;
+import biz.gelicon.guspring.utils.ErrorResponse;
 import biz.gelicon.guspring.utils.GelRequestParam;
+import biz.gelicon.guspring.utils.RestControllerExceptionHandler;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,18 +42,27 @@ public class EdizmController {
 
     @Operation(
             summary = "Список единиц измерения",
-            description = "Возвращает список единиц измерения"
+            description = "Возвращает список единиц измерения <br><br>"
+                    + "Фильтры:<br>"
+                    + "По полю флаг блокировки: key=blockFlag, "
+                    + "value= (1 - Все, 2 - Только заблокированные, 3 - Только не заблокированные)<br>"
+                    + "Только заблокированные: key=onlyBlock value=true"
     )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Успех"),
+            @ApiResponse(responseCode = "224", description = "Ошибка при выборке данных",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ) })
     @RequestMapping(value = "read", method = RequestMethod.POST)
     public List<EdizmEntity> read(
             @RequestBody(required = false) GelRequestParam gelRequestParam
-    ) throws FetchQueryException {
+    ) {
         logger.info("Edizm - read: gelRequestParam = {}", gelRequestParam);
         // Выборка
         String sqlText = ""
                 + "SELECT edizm_id,\n"
                 + "       edizm_name,\n"
-                + "       edizm_notation1,\n"
+                + "       edizm_notation,\n"
                 + "       edizm_blockflag,\n"
                 + "       edizm_code \n"
                 + "FROM   edizm\n"
@@ -87,39 +102,19 @@ public class EdizmController {
             }
         }
         logger.info(sqlText);
-        if (true) {
-            try {
-                return jdbcTemplate.query(sqlText,
-                        (rs, rowNum) ->
-                                new EdizmEntity(
-                                        rs.getInt("edizm_id"),
-                                        rs.getString("edizm_name"),
-                                        rs.getString("edizm_notation"),
-                                        rs.getInt("edizm_blockflag"),
-                                        rs.getString("edizm_code")
-                                )
-                );
-            } catch (Exception e) {
-                throw new FetchQueryException(new Throwable());
-            }
-        } else {
-            try {
-                return jdbcTemplate.query(sqlText,
-                        (rs, rowNum) ->
-                                new EdizmEntity(
-                                        rs.getInt("edizm_id"),
-                                        rs.getString("edizm_name"),
-                                        rs.getString("edizm_notation"),
-                                        rs.getInt("edizm_blockflag"),
-                                        rs.getString("edizm_code")
-                                )
-                );
-            } catch (Exception e) {
-                EdizmEntity error = new EdizmEntity();
-                error.notation = "errorCode=38";
-                error.name = e.getMessage();
-                return Collections.singletonList(error);
-            }
+        try {
+            return jdbcTemplate.query(sqlText,
+                    (rs, rowNum) ->
+                            new EdizmEntity(
+                                    rs.getInt("edizm_id"),
+                                    rs.getString("edizm_name"),
+                                    rs.getString("edizm_notation"),
+                                    rs.getInt("edizm_blockflag"),
+                                    rs.getString("edizm_code")
+                            )
+            );
+        } catch (Exception e) {
+            throw new FetchQueryException(new Throwable(e));
         }
     }
 

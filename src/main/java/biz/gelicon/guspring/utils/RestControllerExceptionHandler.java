@@ -14,18 +14,12 @@ import java.util.Date;
 //  аннотация для обработки исключений в приложении Spring MVC
 public class RestControllerExceptionHandler {
 
-    /**
-     * Отсутствует сортировка при наличии пагинации
-     */
-    public static final int BAD_PAGING_NO_SORT = 123;
-    /**
-     * Ошибка при выборке данных
-     */
-    public static final int FETCH_ERROR = 124;
-    /**
-     * Ошибка при сохранении данных
-     */
-    public static final int POST_ERROR = 125;
+    // Ошибка при выборке данных
+    public static final int FETCH_ERROR = 224;
+    // Ошибка при сохранении данных
+    public static final int POST_ERROR = 225;
+    // Отсутствует сортировка при наличии пагинации
+    public static final int BAD_PAGING_NO_SORT = 226;
 
     @ExceptionHandler(Exception.class)
     // Аннотация работает на уровне контроллера , и он активен только для этого конкретного контроллера
@@ -37,6 +31,7 @@ public class RestControllerExceptionHandler {
         if (e instanceof FetchQueryException) {
             errorResponse.setErrorCode(FETCH_ERROR);
         }
+        errorResponse.setErrorCause(e.getCause().getMessage());
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json; charset=utf-8");

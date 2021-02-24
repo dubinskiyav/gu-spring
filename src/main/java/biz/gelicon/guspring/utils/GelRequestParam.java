@@ -19,8 +19,12 @@ public class GelRequestParam {
     @Schema(description = "Сортировки")
     private List<Sorter> sort;
 
-    @Schema(description = "Фильтры на выборку")
+    @Schema(description = "Фильтры на выборку   Map<String,String>, где key - имя фильтра, value - значение",
+            implementation = Map.class,
+            example = "key=blockFlag value=2 - выбрать только заблокированные сущности")
     private Map<String,String> filters;
+
+
 
     /**
      * Вспомогательный класс для сортировки Имя поля - как в базе

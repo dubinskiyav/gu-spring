@@ -1,6 +1,9 @@
 package biz.gelicon.guspring.exceptions;
 
-public class FetchQueryException extends Exception {
+/**
+ * Исключение при SELECT
+ */
+public class FetchQueryException extends RuntimeException {
 
     public FetchQueryException(
             Throwable err
