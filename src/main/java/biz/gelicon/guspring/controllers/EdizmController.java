@@ -41,13 +41,13 @@ public class EdizmController {
     @RequestMapping(value = "read", method = RequestMethod.POST)
     public List<EdizmEntity> read(
             @RequestBody(required = false) GelRequestParam gelRequestParam
-    ) {
+    ) throws FetchQueryException {
         logger.info("Edizm - read: gelRequestParam = {}", gelRequestParam);
         // Выборка
         String sqlText = ""
                 + "SELECT edizm_id,\n"
                 + "       edizm_name,\n"
-                + "       edizm_notation,\n"
+                + "       edizm_notation1,\n"
                 + "       edizm_blockflag,\n"
                 + "       edizm_code \n"
                 + "FROM   edizm\n"
@@ -100,11 +100,7 @@ public class EdizmController {
                                 )
                 );
             } catch (Exception e) {
-                DataBinder dataBinder = new DataBinder(new EdizmEntity());
-                dataBinder.getBindingResult()
-                        .rejectValue("id", "", sqlText + " " + e.getMessage());
-                //throw new FetchQueryException(dataBinder.getBindingResult(), new Throwable());
-                return null;
+                throw new FetchQueryException(new Throwable());
             }
         } else {
             try {
