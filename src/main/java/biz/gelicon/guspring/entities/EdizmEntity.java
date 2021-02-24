@@ -52,5 +52,16 @@ public class EdizmEntity {
         this.blockflag = blockflag;
         this.code = code;
     }
+
+    @Override
+    public String toString() {
+        return "EdizmEntity{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", notation='" + notation + '\'' +
+                ", blockflag=" + blockflag +
+                ", code='" + code + '\'' +
+                '}';
+    }
 }
 

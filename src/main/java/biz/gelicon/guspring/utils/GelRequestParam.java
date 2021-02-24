@@ -20,8 +20,7 @@ public class GelRequestParam {
     private List<Sorter> sort;
 
     @Schema(description = "Фильтры на выборку   Map<String,String>, где key - имя фильтра, value - значение",
-            implementation = Map.class,
-            example = "key=blockFlag value=2 - выбрать только заблокированные сущности")
+            implementation = Map.class)
     private Map<String,String> filters;
 
 
@@ -32,10 +31,12 @@ public class GelRequestParam {
     @Schema(description = "Сортировка по полю")
     public static class Sorter {
 
-        @Schema(description = "Имя поля для сортировки", example = "edizm_name")
+        @Schema(description = "Имя поля для сортировки, "
+                + "может быть как имя поля в базе edizm_name, так и имя поля в модели name,"
+                + "так и номер поля в запросе, например 1", example = "1")
         private String field;
         @Schema(description = "Направление сортировки, null и ascend - по возрастанию, descend - по убыванию",
-                example = "null и ascend - по возрастанию, descend - по убыванию")
+                example = "ascend")
         private String order;
 
         public Sorter() {

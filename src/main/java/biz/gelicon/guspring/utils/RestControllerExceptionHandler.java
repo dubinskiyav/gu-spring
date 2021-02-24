@@ -1,6 +1,8 @@
 package biz.gelicon.guspring.utils;
 
 import biz.gelicon.guspring.exceptions.FetchQueryException;
+import biz.gelicon.guspring.exceptions.RecordNotFoundException;
+import biz.gelicon.guspring.exceptions.SaveRecordException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,11 @@ public class RestControllerExceptionHandler {
     // Ошибка при выборке данных
     public static final int FETCH_ERROR = 224;
     // Ошибка при сохранении данных
-    public static final int POST_ERROR = 225;
+    public static final int SAVE_ERROR = 225;
     // Отсутствует сортировка при наличии пагинации
     public static final int BAD_PAGING_NO_SORT = 226;
+    // Не найдена запись
+    public static final int RECORD_NOT_FOUND = 227;
 
     @ExceptionHandler(Exception.class)
     // Аннотация работает на уровне контроллера , и он активен только для этого конкретного контроллера
@@ -30,8 +34,13 @@ public class RestControllerExceptionHandler {
         errorResponse.setExceptionClassName(e.getClass().getName()); // установим имя класса
         if (e instanceof FetchQueryException) {
             errorResponse.setErrorCode(FETCH_ERROR);
+            errorResponse.setErrorCause(e.getCause().getMessage());
+        } else if (e instanceof RecordNotFoundException) {
+            errorResponse.setErrorCode(RECORD_NOT_FOUND);
+        } else if (e instanceof SaveRecordException) {
+            errorResponse.setErrorCode(SAVE_ERROR);
+            errorResponse.setErrorCause(e.getCause().getMessage());
         }
-        errorResponse.setErrorCause(e.getCause().getMessage());
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json; charset=utf-8");

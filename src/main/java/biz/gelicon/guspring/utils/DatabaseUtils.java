@@ -85,7 +85,7 @@ public class DatabaseUtils {
             }
         }
         // Иначе и в далльшейшем полагаемся на случай
-        trySequence = false;
+        //trySequence = false;
         // integer	                              -2147483648...+2147483647
         return ThreadLocalRandom.current().nextInt(1000000000) + 1000000000;
     }
