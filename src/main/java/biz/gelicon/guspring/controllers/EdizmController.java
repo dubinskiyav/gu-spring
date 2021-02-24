@@ -1,6 +1,7 @@
 package biz.gelicon.guspring.controllers;
 
 import biz.gelicon.guspring.entities.EdizmEntity;
+import biz.gelicon.guspring.exceptions.FetchQueryException;
 import biz.gelicon.guspring.utils.ConvertUnils;
 import biz.gelicon.guspring.utils.GelRequestParam;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +40,7 @@ public class EdizmController {
     )
     @RequestMapping(value = "read", method = RequestMethod.POST)
     public List<EdizmEntity> read(
-            @RequestBody GelRequestParam gelRequestParam
+            @RequestBody(required = false) GelRequestParam gelRequestParam
     ) {
         logger.info("Edizm - read: gelRequestParam = {}", gelRequestParam);
         // Выборка
@@ -87,22 +87,43 @@ public class EdizmController {
             }
         }
         logger.info(sqlText);
-        try {
-            return jdbcTemplate.query(sqlText,
-                    (rs, rowNum) ->
-                            new EdizmEntity(
-                                    rs.getInt("edizm_id"),
-                                    rs.getString("edizm_name"),
-                                    rs.getString("edizm_notation"),
-                                    rs.getInt("edizm_blockflag"),
-                                    rs.getString("edizm_code")
-                            )
-            );
-        } catch (Exception e) {
-            EdizmEntity error = new EdizmEntity();
-            error.notation = "errorCode=38";
-            error.name = e.getMessage();
-            return Collections.singletonList(error);
+        if (true) {
+            try {
+                return jdbcTemplate.query(sqlText,
+                        (rs, rowNum) ->
+                                new EdizmEntity(
+                                        rs.getInt("edizm_id"),
+                                        rs.getString("edizm_name"),
+                                        rs.getString("edizm_notation"),
+                                        rs.getInt("edizm_blockflag"),
+                                        rs.getString("edizm_code")
+                                )
+                );
+            } catch (Exception e) {
+                DataBinder dataBinder = new DataBinder(new EdizmEntity());
+                dataBinder.getBindingResult()
+                        .rejectValue("id", "", sqlText + " " + e.getMessage());
+                //throw new FetchQueryException(dataBinder.getBindingResult(), new Throwable());
+                return null;
+            }
+        } else {
+            try {
+                return jdbcTemplate.query(sqlText,
+                        (rs, rowNum) ->
+                                new EdizmEntity(
+                                        rs.getInt("edizm_id"),
+                                        rs.getString("edizm_name"),
+                                        rs.getString("edizm_notation"),
+                                        rs.getInt("edizm_blockflag"),
+                                        rs.getString("edizm_code")
+                                )
+                );
+            } catch (Exception e) {
+                EdizmEntity error = new EdizmEntity();
+                error.notation = "errorCode=38";
+                error.name = e.getMessage();
+                return Collections.singletonList(error);
+            }
         }
     }
 
