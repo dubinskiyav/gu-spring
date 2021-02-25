@@ -1,5 +1,6 @@
 package biz.gelicon.guspring.controllers;
 
+import biz.gelicon.guspring.config.SpringJdbcConfig;
 import biz.gelicon.guspring.entities.EdizmEntity;
 import biz.gelicon.guspring.exceptions.FetchQueryException;
 import biz.gelicon.guspring.exceptions.RecordNotFoundException;
@@ -8,7 +9,7 @@ import biz.gelicon.guspring.utils.ConvertUnils;
 import biz.gelicon.guspring.utils.DatabaseUtils;
 import biz.gelicon.guspring.utils.ErrorResponse;
 import biz.gelicon.guspring.utils.GelRequestParam;
-import biz.gelicon.guspring.utils.RestControllerExceptionHandler;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,18 +21,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +47,9 @@ public class EdizmController {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    SpringJdbcConfig springJdbcConfig;
 
     @Operation(
             summary = "Список единиц измерения",
@@ -278,4 +278,29 @@ public class EdizmController {
             }
         }
     }
+
+    @Operation(
+            summary = "Выборка measure из базы jdbc:postgresql://78.40.219.225:5432/capital",
+            description = "Просто для проверки возможности выбора из двух разных баз данных"
+    )
+    @Hidden
+    @Transactional(propagation = Propagation.REQUIRED)
+    @RequestMapping(value = "readtimeweb", method = RequestMethod.POST)
+    public List<String> readtimeweb(
+    ) {
+        String sqlText = ""
+                + "SELECT measure_id,\n"
+                + "       measure_name \n"
+                + "FROM   measure";
+        try {
+            JdbcTemplate j = springJdbcConfig.timewebJdbcTemplate();
+            return j.query(sqlText, (rs, rowNum) ->
+                            rs.getInt("measure_id") + " " + rs.getString("measure_name")
+            );
+        } catch (Exception e) {
+            throw new FetchQueryException(new Throwable(e));
+        }
+    }
+
+
 }
