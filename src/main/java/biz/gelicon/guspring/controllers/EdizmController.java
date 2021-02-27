@@ -49,6 +49,9 @@ public class EdizmController {
     JdbcTemplate jdbcTemplate;
 
     @Autowired
+    JdbcTemplate secondJdbcTemplate;
+
+    @Autowired
     SpringJdbcConfig springJdbcConfig;
 
     @Operation(
@@ -293,8 +296,7 @@ public class EdizmController {
                 + "       measure_name \n"
                 + "FROM   measure";
         try {
-            JdbcTemplate j = springJdbcConfig.timewebJdbcTemplate();
-            return j.query(sqlText, (rs, rowNum) ->
+            return secondJdbcTemplate.query(sqlText, (rs, rowNum) ->
                             rs.getInt("measure_id") + " " + rs.getString("measure_name")
             );
         } catch (Exception e) {
