@@ -49,9 +49,6 @@ public class EdizmController {
     JdbcTemplate jdbcTemplate;
 
     @Autowired
-    JdbcTemplate secondJdbcTemplate;
-
-    @Autowired
     SpringJdbcConfig springJdbcConfig;
 
     @Operation(
@@ -281,28 +278,5 @@ public class EdizmController {
             }
         }
     }
-
-    @Operation(
-            summary = "Выборка measure из базы jdbc:postgresql://78.40.219.225:5432/capital",
-            description = "Просто для проверки возможности выбора из двух разных баз данных"
-    )
-    @Hidden
-    @Transactional(propagation = Propagation.REQUIRED)
-    @RequestMapping(value = "readtimeweb", method = RequestMethod.POST)
-    public List<String> readtimeweb(
-    ) {
-        String sqlText = ""
-                + "SELECT measure_id,\n"
-                + "       measure_name \n"
-                + "FROM   measure";
-        try {
-            return secondJdbcTemplate.query(sqlText, (rs, rowNum) ->
-                            rs.getInt("measure_id") + " " + rs.getString("measure_name")
-            );
-        } catch (Exception e) {
-            throw new FetchQueryException(new Throwable(e));
-        }
-    }
-
 
 }
