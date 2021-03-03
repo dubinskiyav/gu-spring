@@ -9,7 +9,6 @@ import biz.gelicon.guspring.utils.ConvertUnils;
 import biz.gelicon.guspring.utils.DatabaseUtils;
 import biz.gelicon.guspring.utils.ErrorResponse;
 import biz.gelicon.guspring.utils.GelRequestParam;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -85,6 +84,7 @@ public class EdizmController {
         // Сформируем секцию пагинации
         // Соответствия полей в базе с полями в клиентах
         // todo надо вытащить из аннотаций
+        // Проба отправки в репозиторий
         // Соответствия полей в базе с полями в клиентах
         Map<String, String> fieldMap = new HashMap<>();
         fieldMap.put("id", "edizm_id");
